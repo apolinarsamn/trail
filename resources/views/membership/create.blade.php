@@ -955,7 +955,7 @@
                 'Humidity: --';
 
             fetch(
-                `{{ route('weather.show') }}?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`
+                `/weather?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`
             )
                 .then(response => {
                     if (!response.ok) {
