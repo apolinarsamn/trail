@@ -42,37 +42,43 @@ class WeatherController extends Controller
     }
 
     public function search(Request $request): JsonResponse
-{
-    $data = $request->validate([
-        'q' => ['required', 'string', 'min:3', 'max:150'],
-    ]);
-
-    $response = Http::timeout(10)
-        ->withHeaders([
-            'User-Agent' => config('app.name', 'TRAIL') . ' local development',
-        ])
-        ->get('https://nominatim.openstreetmap.org/search', [
-            'q' => $data['q'],
-            'format' => 'jsonv2',
-            'limit' => 5,
-            'addressdetails' => 1,
-            'countrycodes' => 'ph',
+    {
+        $data = $request->validate([
+            'q' => ['required', 'string', 'min:3', 'max:150'],
         ]);
 
-    if ($response->failed()) {
-        return response()->json([
-            'message' => 'Location search is currently unavailable.',
-        ], 503);
-    }
+        $response = Http::timeout(10)
+            ->acceptJson()
+            ->withHeaders([
+                'User-Agent' => 'TRAIL Membership System/1.0 (+https://trail-membership.up.railway.app)',
+                'Referer' => config('app.url'),
+            ])
+            ->get('https://nominatim.openstreetmap.org/search', [
+                'q' => $data['q'],
+                'format' => 'jsonv2',
+                'limit' => 5,
+                'addressdetails' => 1,
+                'countrycodes' => 'ph',
+            ]);
 
-    return response()->json(
-        collect($response->json())->map(function ($location) {
-            return [
-                'name' => $location['display_name'],
-                'latitude' => (float) $location['lat'],
-                'longitude' => (float) $location['lon'],
-            ];
-        })->values()
-    );
-}
+        if ($response->failed()) {
+            logger()->warning('Nominatim location search failed.', [
+                'status' => $response->status(),
+            ]);
+
+            return response()->json([
+                'message' => 'Location search is currently unavailable.',
+            ], 503);
+        }
+
+        return response()->json(
+            collect($response->json())->map(function ($location) {
+                return [
+                    'name' => $location['display_name'],
+                    'latitude' => (float) $location['lat'],
+                    'longitude' => (float) $location['lon'],
+                ];
+            })->values()
+        );
+    }
 }
