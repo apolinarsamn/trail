@@ -1087,7 +1087,7 @@
 
         try {
             const response = await fetch(
-                `{{ route('locations.search') }}?q=${encodeURIComponent(query)}`,
+                `/locations/search?q=${encodeURIComponent(query)}`,
                 {
                     headers: {
                         Accept: 'application/json',
