@@ -687,7 +687,7 @@
                                     <span class="plan-inclusions">
                                     <span class="plan-inclusions-label">Includes</span>
 
-                                    @foreach ($content['benefits'] as $benefit)
+                                    @foreach (($content['benefits'] ?? []) as $benefit)
                                         <span class="plan-benefit">
                                             <span aria-hidden="true">✓</span>
                                             {{ $benefit }}
